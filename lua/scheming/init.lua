@@ -1,3 +1,5 @@
+local Config = require("scheming.config")
+
 ---@class PartialConfig
 
 ---@class SchemingConfig
@@ -16,7 +18,7 @@ local scheming = nil
 function Scheming:new()
 	if not scheming then
 		scheming = setmetatable({
-			config = {},
+			config = Config:with_default(),
 		}, Scheming)
 	end
 	return scheming
@@ -30,7 +32,11 @@ end
 function Scheming.setup(config)
 	local self = Scheming:new()
 	self.config = vim.tbl_deep_extend("force", self.config, config)
+
+	print(vim.inspect(self.config))
 	return self
 end
+
+Scheming.setup({})
 
 return Scheming
