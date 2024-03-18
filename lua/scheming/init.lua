@@ -31,12 +31,12 @@ end
 ---@return Scheming
 function Scheming.setup(config)
 	local self = Scheming:new()
-	self.config = vim.tbl_deep_extend("force", self.config, config)
-
-	print(vim.inspect(self.config))
+	self.config:merge(config)
+	self.config:create_user_commands()
 	return self
 end
 
 Scheming.setup({})
+vim.keymap.set("n", "<leader>sct", "<cmd>SchemingToggle<CR>", { noremap = true, silent = true })
 
 return Scheming
