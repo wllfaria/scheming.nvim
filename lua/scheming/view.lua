@@ -103,7 +103,9 @@ function View:select_scheme()
 		return
 	end
 	self.loader:apply_scheme(line)
-	self.fs:change_scheme(line, scheme_config)
+	if self.config.persist_scheme then
+		self.fs:change_scheme(line, scheme_config)
+	end
 	self.has_confirmed = true
 	self:close()
 end

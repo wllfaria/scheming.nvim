@@ -10,9 +10,6 @@
 
 ---
 
-##  Status
-Scheming is still in development, and it's not ready for use yet.
-
 ## 󰏔 Installation
 Install the plugin with your package manager of choice.
 
@@ -41,7 +38,7 @@ The default values are shown below.
     persist_scheme = true, -- persist selected scheme cross sessions
     window = {
         height = 12, -- window height in lines
-        width = 40, -- window width in columns (only for "float" layout)
+        width = 80, -- window width in columns (only for "float" layout)
         border = "single", -- "single", "double" or "rounded"
         show_border = true, -- show/hide border
         title = "Scheming", -- window title
@@ -59,10 +56,6 @@ The default values are shown below.
     schemes = {
         -- list of schemes to be displayed
         -- refer to the usage section below
-    },
-    scheme_by_ft = {
-        -- list of schemes to be used by filetypes
-        -- refer to the advanced usage section
     },
     sorting = {
         by = "name" -- "name" or "tag" (sort by name or tag)
@@ -97,27 +90,10 @@ following ways.
 }
 ```
 
-> NOTE: when providing a configuration table, scheming will require the scheme
+> NOTE: you can provide a configuration table for the schemes, and scheming
+will call `setup()` for the scheme with the provided configuration.
 
-
-##  Advanced Usage
-Below are some advanced configuration examples.
-
-### Schemes by filetype
-You can use the `scheme_by_ft` table to set a scheme to be used by a filetype.
-
-```lua
-{
-    scheme_by_ft = {
-        -- just the name of the scheme
-        rust = "radium", 
-        elixir = "rose-pine",
-        lua = "gruvbox",
-    }
-}
-```
-
-### Override highlight groups
+##  Overriding highlight groups
 You can use the `override_hl` table to override neovim highlight groups.
 
 ```lua
