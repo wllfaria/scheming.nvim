@@ -27,6 +27,11 @@ Install the plugin with your package manager of choice.
 }
 ```
 
+##  Preview
+
+![A gif preview of the plugin](./.github/preview.gif)
+
+
 ##  Configuration
 you can configure the plugin by passing a table to the `setup` function. 
 The default values are shown below.

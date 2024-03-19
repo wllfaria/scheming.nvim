@@ -52,6 +52,7 @@ end
 
 function Loader:apply_scheme(scheme_name)
 	vim.cmd("silent! colorscheme " .. scheme_name)
+	self:apply_override_hl()
 end
 
 function Loader:apply_override_hl()
