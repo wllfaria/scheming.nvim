@@ -1,5 +1,3 @@
-local View = require("scheming.view")
-
 ---@class SchemingMappings
 ---@field cancel string[] @field next string[]
 ---@field prev string[]
@@ -17,6 +15,16 @@ local View = require("scheming.view")
 local Config = {}
 Config.__index = Config
 
+local instance = nil
+
+---Create a new instance of SchemingConfig with default values.
+---This should only be used by Scheming main package, to get
+---to get the current configuration use:
+---```lua
+---Config:get()
+---```
+---
+---@return SchemingConfig
 function Config:with_default()
 	---@type SchemingConfig
 	local default = {
@@ -29,8 +37,18 @@ function Config:with_default()
 		},
 		schemes = {},
 	}
+	instance = setmetatable(default, Config)
+	return instance
+end
 
-	return setmetatable(default, Config)
+---Get the current configuration values.
+---
+---@return SchemingConfig
+function Config:get()
+	if not instance then
+		instance = Config:with_default()
+	end
+	return instance
 end
 
 function Config:merge(config)
@@ -41,13 +59,6 @@ function Config:merge(config)
 			self[k] = v
 		end
 	end
-	print(vim.inspect(self))
-end
-
-function Config:create_user_commands()
-	vim.api.nvim_create_user_command("SchemingToggle", function()
-		View:toggle()
-	end, {})
 end
 
 return Config
