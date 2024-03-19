@@ -10,7 +10,7 @@ end
 
 function Commands:create_user_commands()
 	vim.api.nvim_create_user_command("SchemingToggle", function()
-		View:toggle()
+		View:new():toggle()
 	end, {})
 end
 

@@ -2,8 +2,19 @@ local Config = require("scheming.config")
 local Commands = require("scheming.commands")
 local View = require("scheming.view")
 
+---@class PartialWindowConfig
+---@field height number?
+---@field width number?
+---@field show_border boolean?
+---@field border "single" | "double" | "rounded"?
+---@field show_title boolean?
+---@field title string?
+---@field title_align "left" | "center" | "right"?
+
 ---@class PartialConfig
----@field schemes string[] | table<string, table> | nil
+---@field schemes string[] | table<string, table>?
+---@field layout "bottom" | "float"?
+---@field window PartialWindowConfig?
 
 ---@class Scheming
 ---@field config SchemingConfig
@@ -41,7 +52,13 @@ function Scheming.setup(config)
 end
 
 Scheming.setup({
+	layout = "bottom",
 	schemes = { "radium", "rose-pine" },
+	window = {
+		height = 8,
+		show_border = true,
+		border = "single",
+	},
 })
 vim.keymap.set("n", "<leader>sct", "<cmd>SchemingToggle<CR>", { noremap = true, silent = true })
 

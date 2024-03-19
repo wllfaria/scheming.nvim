@@ -23,26 +23,58 @@ function View:new()
 end
 
 function View:toggle()
-	if Config:get().layout == "bottom" then
+	local layout = Config:get().layout
+	if layout == "bottom" then
 		self:open_bottom()
+	elseif layout == "float" then
+		self:open_float()
 	end
 end
 
 function View:open_bottom()
-	local self = View:new()
 	if not self.is_open then
-		local height = 12
+		local config = Config:get()
+		local border_size = config.window.show_border and 2 or 0
+		local statusline_size = vim.o.cmdheight - 1
+		-- Only show the title if the border is also shown, this is required by the API
+		local show_title = config.window.show_title and config.window.show_border
 		---@type vim.api.keyset.win_config
 		local options = {
 			relative = "editor",
 			width = vim.o.columns,
-			height = height,
-			row = vim.o.lines - vim.o.cmdheight - 3 - height,
-			col = 0,
 			style = "minimal",
-			title = "Scheming",
-			title_pos = "center",
-			border = "double",
+			col = 0,
+			row = vim.o.lines - statusline_size - border_size - config.window.height,
+			height = config.window.height,
+			title = show_title and config.window.title or nil,
+			title_pos = config.window.show_title and config.window.title_align or nil,
+			border = config.window.show_border and config.window.border or nil,
+		}
+		self:create_win(options)
+		self:populate_list()
+		self:create_auto_commands()
+		self:open()
+	else
+		self:close()
+	end
+end
+
+function View:open_float()
+	if not self.is_open then
+		local config = Config:get()
+		-- Only show the title if the border is also shown, this is required by the API
+		local show_title = config.window.show_title and config.window.show_border
+		---@type vim.api.keyset.win_config
+		local options = {
+			relative = "editor",
+			style = "minimal",
+			col = math.ceil((vim.o.columns - config.window.width) / 2),
+			row = math.ceil((vim.o.lines - config.window.height) / 2 - 1),
+			width = config.window.width,
+			height = config.window.height,
+			title = show_title and config.window.title or nil,
+			title_pos = show_title and config.window.title_align or nil,
+			border = config.window.show_border and config.window.border or nil,
 		}
 		self:create_win(options)
 		self:populate_list()
@@ -68,8 +100,8 @@ function View:create_auto_commands()
 		buffer = self.buf,
 		group = self.augroup,
 		callback = function()
-			local line = vim.api.nvim_get_current_line()
-			vim.cmd("colorscheme " .. line)
+			local scheme = vim.api.nvim_get_current_line()
+			vim.cmd.colorscheme(scheme)
 		end,
 	})
 	vim.api.nvim_create_autocmd("WinClosed", {
@@ -87,7 +119,6 @@ end
 function View:create_win(options)
 	self.buf = vim.api.nvim_create_buf(false, true)
 	self.win = vim.api.nvim_open_win(self.buf, true, options)
-	vim.cmd([[highlight FloatBorder guibg=NONE ctermbg=NONE]])
 end
 
 function View:open()
@@ -96,7 +127,6 @@ function View:open()
 		vim.api.nvim_set_option_value("number", true, { win = self.win })
 		vim.api.nvim_set_option_value("relativenumber", false, { win = self.win })
 		vim.api.nvim_set_option_value("buftype", "nofile", { buf = self.buf })
-		vim.api.nvim_set_option_value("winhl", "Normal:Normal", { win = self.win })
 		vim.api.nvim_set_option_value("modifiable", false, { buf = self.buf })
 	end
 end

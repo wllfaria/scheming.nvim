@@ -2,6 +2,15 @@
 ---@field cancel string[]
 ---@field select string[]
 
+---@class SchemingWindowConfig
+---@field height number
+---@field width number
+---@field show_border boolean
+---@field border "single" | "double" | "rounded"
+---@field show_title boolean
+---@field title string
+---@field title_align "left" | "center" | "right"
+
 ---Main configuration for scheming.
 ---
 ---* schemes: can either be a list of strings, or a table with
@@ -11,6 +20,7 @@
 ---@field layout "float" | "bottom"
 ---@field mappings SchemingMappings
 ---@field schemes string[] | table<string, table>
+---@field window SchemingWindowConfig
 local Config = {}
 Config.__index = Config
 
@@ -28,6 +38,15 @@ function Config:with_default()
 	---@type SchemingConfig
 	local default = {
 		layout = "bottom",
+		window = {
+			height = 12,
+			width = 80,
+			show_border = true,
+			border = "single",
+			show_title = true,
+			title = "Scheming",
+			title_align = "center",
+		},
 		mappings = {
 			cancel = { "q", "<C-c>" },
 			select = { "<CR>" },
