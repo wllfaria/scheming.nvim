@@ -11,6 +11,7 @@ local Loader = require("scheming.loader")
 ---@field config SchemingConfig
 ---@field loader SchemingLoader
 ---@field current_scheme string
+---@field has_confirmed boolean
 local View = {}
 View.__index = View
 
@@ -26,6 +27,7 @@ function View:new()
 			fs = Fs:new(),
 			config = Config:get(),
 			loader = Loader:new(),
+			has_confirmed = false,
 			current_scheme = nil,
 		}, View)
 	end
@@ -35,9 +37,10 @@ end
 ---@return boolean
 function View:toggle()
 	if self.is_open then
-		self:close()
+		self:cancel_selection()
 		return self.is_open
 	end
+	self.has_confirmed = false
 	self.current_scheme = self.fs:config_read().scheme
 	local layout = self.config.layout
 	if layout == "bottom" then
@@ -92,24 +95,39 @@ function View:open_float()
 end
 
 function View:select_scheme()
-	local scheme_name, scheme_config = self:get_selected_scheme()
-	self.loader:setup_scheme(scheme_name, scheme_config)
-	self.fs:change_scheme(scheme_name, scheme_config)
+	local line, scheme_name, scheme_config = self:get_selected_scheme()
+	local ok = self.loader:setup_scheme(scheme_name, scheme_config)
+	if not ok then
+		self:cancel_selection()
+		self:close()
+		return
+	end
+	self.loader:apply_scheme(line)
+	self.fs:change_scheme(line, scheme_config)
+	self.has_confirmed = true
 	self:close()
 end
 
+---@return string, string, table
 function View:get_selected_scheme()
 	local line = vim.api.nvim_get_current_line()
 	---@type string|table|SchemeConfig
 	local config = self.config.schemes[line]
+	if not config then
+		return line, line, {}
+	end
 	local scheme_name = config.package_name and config.package_name or line
 	local scheme_config = config.config and config.config or config
-	return scheme_name, scheme_config
+	return line, scheme_name, scheme_config
+end
+
+function View:revert_scheme()
+	self.loader:apply_scheme(self.current_scheme)
 end
 
 function View:cancel_selection()
 	self:close()
-	self.loader:apply_scheme(self.current_scheme)
+	self:revert_scheme()
 end
 
 function View:load_current_scheme()
@@ -121,15 +139,25 @@ end
 
 function View:maybe_apply_initial_preview()
 	if self.config.enable_preview then
-		local scheme_name, scheme_config = self:get_selected_scheme()
-		self.loader:setup_scheme(scheme_name, scheme_config)
+		local _, scheme_name, scheme_config = self:get_selected_scheme()
+		local ok = self.loader:setup_scheme(scheme_name, scheme_config)
+		if not ok then
+			self:cancel_selection()
+			self:close()
+			return
+		end
+		self.loader:apply_scheme(scheme_name)
 	end
 end
 
 function View:populate_list()
-	local schemes = Config:get().schemes
+	local sorted_keys, schemes = self:sort_schemes()
 	local lines = {}
-	for key, scheme in pairs(schemes) do
+	for _, key in ipairs(sorted_keys) do
+		local scheme = schemes[key]
+		if not scheme then
+			table.insert(lines, key)
+		end
 		if type(scheme) == "table" then
 			table.insert(lines, key)
 		else
@@ -137,6 +165,78 @@ function View:populate_list()
 		end
 	end
 	vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
+end
+
+---@return string[], table
+function View:sort_schemes()
+	local sorted = self.config.schemes
+
+	if self.config.sorting.order == "none" then
+		return self:sort_noop(sorted, self.config.sorting.order)
+	elseif self.config.sorting.by == "name" then
+		return self:sort_by_name(sorted, self.config.sorting.order)
+	end
+
+	return self:sort_by_tag(sorted, self.config.sorting.order)
+end
+
+---@param schemes table
+---@param order SortingOrder
+---@return string[], table
+function View:sort_by_name(schemes, order)
+	local keys = {}
+
+	for k in pairs(schemes) do
+		table.insert(keys, k)
+	end
+
+	table.sort(keys, function(a, b)
+		return (order == "asc" and a < b) or (order == "desc" and a > b)
+	end)
+
+	return keys, schemes
+end
+
+---@param schemes table
+---@param order SortingOrder
+---@return string[], table
+function View:sort_by_tag(schemes, order)
+	local keys = {}
+
+	for key, v in pairs(schemes) do
+		if type(v) == "table" then
+			table.insert(keys, key)
+		else
+			table.insert(keys, v)
+		end
+	end
+
+	table.sort(keys, function(a, b)
+		local a_tag = type(schemes[a]) == "table" and schemes[a].tag or nil
+		local b_tag = type(schemes[b]) == "table" and schemes[b].tag or nil
+
+		if a_tag and b_tag then
+			return (order == "asc" and a_tag < b_tag) or (order == "desc" and a_tag > b_tag)
+		elseif a_tag and not b_tag then
+			return order == "asc"
+		elseif not a_tag and b_tag then
+			return order == "desc"
+		end
+
+		return (order == "asc" and a < b) or (order == "desc" and a > b)
+	end)
+
+	return keys, schemes
+end
+
+function View:sort_noop(schemes, _)
+	local keys = {}
+
+	for k in pairs(schemes) do
+		table.insert(keys, k)
+	end
+
+	return keys, schemes
 end
 
 ---@param options vim.api.keyset.win_config

@@ -64,21 +64,24 @@ function Scheming.setup(config)
 	self.commands:create_user_commands()
 	self.commands:create_global_keymaps()
 	local scheme_config = self.fs:config_read()
-	self.loader:setup_scheme(scheme_config.scheme, scheme_config.config)
+	local scheme_name = scheme_config.config.package_name and scheme_config.config.package_name or scheme_config.scheme
+	self.loader:setup_scheme(scheme_name, scheme_config.config)
+	self.loader:apply_scheme(scheme_config.scheme)
 	return self
 end
 
 Scheming.setup({
 	layout = "bottom",
+	enable_preview = true,
 	schemes = {
 		radium = {
 			package_name = "colors.radium",
 		},
 		["rose-pine"] = {
+			tag = "dark",
 			variant = "main",
 		},
 		catppuccin = {
-			tag = "dark",
 			config = {
 				flavour = "latte",
 			},
@@ -87,7 +90,10 @@ Scheming.setup({
 	mappings = {
 		toggle = { "<leader>sc" },
 	},
-	enable_preview = true,
+	sorting = {
+		by = "tag",
+		order = "asc",
+	},
 })
 
 return Scheming

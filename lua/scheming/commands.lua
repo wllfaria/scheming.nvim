@@ -1,5 +1,6 @@
 local View = require("scheming.view")
 local Config = require("scheming.config")
+local Loader = require("scheming.loader")
 
 ---@class SchemingCommands
 ---@field augroup string
@@ -43,8 +44,12 @@ function Commands:create_auto_commands()
 			buffer = view.buf,
 			group = self.augroup,
 			callback = function()
-				local scheme = vim.api.nvim_get_current_line()
-				vim.cmd("silent! colorscheme " .. scheme)
+				local line, name, config = View:new():get_selected_scheme()
+				local ok = Loader:new():setup_scheme(name, config)
+				Loader:new():apply_scheme(line)
+				if not ok then
+					View:new():revert_scheme()
+				end
 			end,
 		})
 	end
@@ -52,7 +57,9 @@ function Commands:create_auto_commands()
 		buffer = view.buf,
 		group = view.augroup,
 		callback = function()
-			View:new():clear()
+			if not View:new().has_confirmed then
+				View:new():cancel_selection()
+			end
 		end,
 	})
 end

@@ -22,25 +22,26 @@ end
 ---@param scheme_name string
 ---@param scheme_config string | table | SchemeConfig
 function Loader:setup_scheme(scheme_name, scheme_config)
-	if not scheme_name then
-		return
+	if not scheme_name or scheme_name == "" then
+		return false
 	end
 	if scheme_config then
 		local ok, package = pcall(require, scheme_name)
 		if not ok then
 			self:scheme_not_found(scheme_name)
-			return
+			return false
 		end
 		package.setup(scheme_config)
 	else
 		local ok, package = pcall(require, scheme_name)
+		print(ok, package)
 		if not ok then
 			self:scheme_not_found(scheme_name)
-			return
+			return false
 		end
 		package.setup({})
 	end
-	self:apply_scheme(scheme_name)
+	return true
 end
 
 function Loader:scheme_not_found(scheme_name)

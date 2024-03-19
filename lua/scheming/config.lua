@@ -17,6 +17,13 @@
 ---@field tag string?
 ---@field config table
 
+---@class SchemingSorting
+---@field by "name" | "tag"
+---@field order SortingOrder
+
+---@alias SortingOrder "none" | "asc" | "desc"
+---@alias SchemeList string[] | table<string, any> | table<string, SchemeConfig>
+
 ---Main configuration for scheming.
 ---
 ---* schemes: can either be a list of strings, or a table with
@@ -25,10 +32,11 @@
 ---@class SchemingConfig
 ---@field layout "float" | "bottom"
 ---@field mappings SchemingMappings
----@field schemes string[] | table | SchemeConfig
+---@field schemes SchemeList
 ---@field window SchemingWindowConfig
 ---@field enable_preview boolean
 ---@field persist_scheme boolean
+---@field sorting SchemingSorting
 local Config = {}
 Config.__index = Config
 
@@ -51,10 +59,10 @@ function Config:with_default()
 		window = {
 			height = 12,
 			width = 80,
-			show_border = true,
 			border = "single",
-			show_title = true,
+			show_border = true,
 			title = "Scheming",
+			show_title = true,
 			title_align = "center",
 		},
 		mappings = {
@@ -63,6 +71,10 @@ function Config:with_default()
 			toggle = {},
 		},
 		schemes = {},
+		sorting = {
+			by = "name",
+			order = "none",
+		},
 	}
 	instance = setmetatable(default, Config)
 	return instance
