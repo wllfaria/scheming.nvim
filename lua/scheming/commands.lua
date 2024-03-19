@@ -64,7 +64,7 @@ function Commands:create_keymaps()
 			self.view.buf,
 			"n",
 			key,
-			"<cmd>SchemingToggle<CR>",
+			"<cmd>lua require('scheming.view'):new():cancel_selection()<CR>",
 			{ noremap = true, silent = true }
 		)
 	end

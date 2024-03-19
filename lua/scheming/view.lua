@@ -10,6 +10,7 @@ local Loader = require("scheming.loader")
 ---@field fs SchemingFs
 ---@field config SchemingConfig
 ---@field loader SchemingLoader
+---@field current_scheme string
 local View = {}
 View.__index = View
 
@@ -25,6 +26,7 @@ function View:new()
 			fs = Fs:new(),
 			config = Config:get(),
 			loader = Loader:new(),
+			current_scheme = nil,
 		}, View)
 	end
 	return instance
@@ -32,7 +34,12 @@ end
 
 ---@return boolean
 function View:toggle()
-	local layout = Config:get().layout
+	if self.is_open then
+		self:close()
+		return self.is_open
+	end
+	self.current_scheme = self.fs:config_read().scheme
+	local layout = self.config.layout
 	if layout == "bottom" then
 		self:open_bottom()
 	elseif layout == "float" then
@@ -42,59 +49,57 @@ function View:toggle()
 end
 
 function View:open_bottom()
-	if not self.is_open then
-		local border_size = self.config.window.show_border and 2 or 0
-		local statusline_size = vim.o.cmdheight + 1
-		-- Only show the title if the border is also shown, this is required by the API
-		local show_title = self.config.window.show_title and self.config.window.show_border
-		---@type vim.api.keyset.win_config
-		local options = {
-			relative = "editor",
-			width = vim.o.columns,
-			style = "minimal",
-			col = 0,
-			row = vim.o.lines - statusline_size - border_size - self.config.window.height,
-			height = self.config.window.height,
-			title = show_title and self.config.window.title or nil,
-			title_pos = self.config.window.show_title and self.config.window.title_align or nil,
-			border = self.config.window.show_border and self.config.window.border or nil,
-		}
-		self:create_win(options)
-		self:populate_list()
-		self:open()
-	else
-		self:close()
-	end
+	local border_size = self.config.window.show_border and 2 or 0
+	local statusline_size = vim.o.cmdheight + 1
+	-- Only show the title if the border is also shown, this is required by the API
+	local show_title = self.config.window.show_title and self.config.window.show_border
+	---@type vim.api.keyset.win_config
+	local options = {
+		relative = "editor",
+		width = vim.o.columns,
+		style = "minimal",
+		col = 0,
+		row = vim.o.lines - statusline_size - border_size - self.config.window.height,
+		height = self.config.window.height,
+		title = show_title and self.config.window.title or nil,
+		title_pos = self.config.window.show_title and self.config.window.title_align or nil,
+		border = self.config.window.show_border and self.config.window.border or nil,
+	}
+	self:create_win(options)
+	self:populate_list()
+	self:open()
 end
 
 function View:open_float()
-	if not self.is_open then
-		-- Only show the title if the border is also shown, this is required by the API
-		local show_title = self.config.window.show_title and self.config.window.show_border
-		---@type vim.api.keyset.win_config
-		local options = {
-			relative = "editor",
-			style = "minimal",
-			col = math.ceil((vim.o.columns - self.config.window.width) / 2),
-			row = math.ceil((vim.o.lines - self.config.window.height) / 2 - 1),
-			width = self.config.window.width,
-			height = self.config.window.height,
-			title = show_title and self.config.window.title or nil,
-			title_pos = show_title and self.config.window.title_align or nil,
-			border = self.config.window.show_border and self.config.window.border or nil,
-		}
-		self:create_win(options)
-		self:populate_list()
-		self:open()
-	else
-		self:close()
-	end
+	-- Only show the title if the border is also shown, this is required by the API
+	local show_title = self.config.window.show_title and self.config.window.show_border
+	---@type vim.api.keyset.win_config
+	local options = {
+		relative = "editor",
+		style = "minimal",
+		col = math.ceil((vim.o.columns - self.config.window.width) / 2),
+		row = math.ceil((vim.o.lines - self.config.window.height) / 2 - 1),
+		width = self.config.window.width,
+		height = self.config.window.height,
+		title = show_title and self.config.window.title or nil,
+		title_pos = show_title and self.config.window.title_align or nil,
+		border = self.config.window.show_border and self.config.window.border or nil,
+	}
+	self:create_win(options)
+	self:populate_list()
+	self:open()
 end
 
 function View:select_scheme()
 	local scheme_name = vim.api.nvim_get_current_line()
 	local scheme_config = self.config.schemes[scheme_name]
 	self.loader:setup_scheme(scheme_name, scheme_config)
+	self:close()
+end
+
+function View:cancel_selection()
+	self:close()
+	vim.cmd("silent! colorscheme " .. self.current_scheme)
 end
 
 function View:load_current_scheme()
