@@ -1,6 +1,7 @@
 ---@class SchemingMappings
 ---@field cancel string[]
 ---@field select string[]
+---@field toggle string[]
 
 ---@class SchemingWindowConfig
 ---@field height number
@@ -11,6 +12,11 @@
 ---@field title string
 ---@field title_align "left" | "center" | "right"
 
+---@class SchemeConfig
+---@field package_name string?
+---@field tag string?
+---@field config table
+
 ---Main configuration for scheming.
 ---
 ---* schemes: can either be a list of strings, or a table with
@@ -19,9 +25,10 @@
 ---@class SchemingConfig
 ---@field layout "float" | "bottom"
 ---@field mappings SchemingMappings
----@field schemes string[] | table<string, table>
+---@field schemes string[] | table | SchemeConfig
 ---@field window SchemingWindowConfig
 ---@field enable_preview boolean
+---@field persist_scheme boolean
 local Config = {}
 Config.__index = Config
 
@@ -40,6 +47,7 @@ function Config:with_default()
 	local default = {
 		layout = "bottom",
 		enable_preview = true,
+		persist_scheme = true,
 		window = {
 			height = 12,
 			width = 80,
@@ -52,6 +60,7 @@ function Config:with_default()
 		mappings = {
 			cancel = { "q", "<C-c>" },
 			select = { "<CR>" },
+			toggle = {},
 		},
 		schemes = {},
 	}
