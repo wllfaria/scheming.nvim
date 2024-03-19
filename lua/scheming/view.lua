@@ -45,6 +45,7 @@ function View:toggle()
 	elseif layout == "float" then
 		self:open_float()
 	end
+	self:maybe_apply_initial_preview()
 	return self.is_open
 end
 
@@ -91,21 +92,37 @@ function View:open_float()
 end
 
 function View:select_scheme()
-	local scheme_name = vim.api.nvim_get_current_line()
-	local scheme_config = self.config.schemes[scheme_name]
+	local scheme_name, scheme_config = self:get_selected_scheme()
 	self.loader:setup_scheme(scheme_name, scheme_config)
+	self.fs:change_scheme(scheme_name, scheme_config)
 	self:close()
+end
+
+function View:get_selected_scheme()
+	local line = vim.api.nvim_get_current_line()
+	---@type string|table|SchemeConfig
+	local config = self.config.schemes[line]
+	local scheme_name = config.package_name and config.package_name or line
+	local scheme_config = config.config and config.config or config
+	return scheme_name, scheme_config
 end
 
 function View:cancel_selection()
 	self:close()
-	vim.cmd("silent! colorscheme " .. self.current_scheme)
+	self.loader:apply_scheme(self.current_scheme)
 end
 
 function View:load_current_scheme()
 	local saved_config = self.fs:config_read()
 	if saved_config then
-		vim.cmd("silent! colorscheme " .. saved_config.scheme)
+		self.loader:apply_scheme(saved_config.scheme)
+	end
+end
+
+function View:maybe_apply_initial_preview()
+	if self.config.enable_preview then
+		local scheme_name, scheme_config = self:get_selected_scheme()
+		self.loader:setup_scheme(scheme_name, scheme_config)
 	end
 end
 

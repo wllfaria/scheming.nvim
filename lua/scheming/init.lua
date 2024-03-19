@@ -75,9 +75,14 @@ Scheming.setup({
 			package_name = "colors.radium",
 		},
 		["rose-pine"] = {
-			variant = "nononon",
+			variant = "main",
 		},
-		"catpuccin",
+		catppuccin = {
+			tag = "dark",
+			config = {
+				flavour = "latte",
+			},
+		},
 	},
 	mappings = {
 		toggle = { "<leader>sc" },

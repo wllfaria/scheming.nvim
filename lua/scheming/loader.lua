@@ -22,16 +22,16 @@ end
 ---@param scheme_name string
 ---@param scheme_config string | table | SchemeConfig
 function Loader:setup_scheme(scheme_name, scheme_config)
+	if not scheme_name then
+		return
+	end
 	if scheme_config then
-		local custom_name = scheme_config.package_name and scheme_config.package_name or scheme_name
-		local custom_config = scheme_config.config and scheme_config.config or scheme_config
-		local ok, package = pcall(require, custom_name)
+		local ok, package = pcall(require, scheme_name)
 		if not ok then
 			self:scheme_not_found(scheme_name)
 			return
 		end
-		package.setup(custom_config)
-		self.fs:change_scheme(scheme_name, custom_config)
+		package.setup(scheme_config)
 	else
 		local ok, package = pcall(require, scheme_name)
 		if not ok then
@@ -39,7 +39,6 @@ function Loader:setup_scheme(scheme_name, scheme_config)
 			return
 		end
 		package.setup({})
-		self.fs:change_scheme(scheme_name, {})
 	end
 	self:apply_scheme(scheme_name)
 end
