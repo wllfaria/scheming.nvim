@@ -3,8 +3,7 @@ local Commands = require("scheming.commands")
 local View = require("scheming.view")
 
 ---@class PartialConfig
-
----@class SchemingConfig
+---@field schemes string[] | table<string, table> | nil
 
 ---@class Scheming
 ---@field config SchemingConfig
@@ -41,7 +40,9 @@ function Scheming.setup(config)
 	return self
 end
 
-Scheming.setup({})
+Scheming.setup({
+	schemes = { "radium", "rose-pine" },
+})
 vim.keymap.set("n", "<leader>sct", "<cmd>SchemingToggle<CR>", { noremap = true, silent = true })
 
 return Scheming
