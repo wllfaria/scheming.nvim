@@ -63,11 +63,6 @@ function View:populate_list()
 end
 
 function View:create_auto_commands()
-	-- TODO: loading a colorscheme is expensive
-	-- - save the current scheme
-	-- - changes schemes on list, save what is the current one
-	-- - if the user selects a scheme, I have to persist it
-	-- - if the user closes the list, I have to restore the previous scheme
 	vim.api.nvim_create_augroup(self.augroup, { clear = true })
 	vim.api.nvim_create_autocmd("CursorMoved", {
 		buffer = self.buf,

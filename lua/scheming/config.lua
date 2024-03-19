@@ -1,6 +1,5 @@
 ---@class SchemingMappings
----@field cancel string[] @field next string[]
----@field prev string[]
+---@field cancel string[]
 ---@field select string[]
 
 ---Main configuration for scheming.
@@ -31,8 +30,6 @@ function Config:with_default()
 		layout = "bottom",
 		mappings = {
 			cancel = { "q", "<C-c>" },
-			next = { "<C-n>" },
-			prev = { "<C-p>" },
 			select = { "<CR>" },
 		},
 		schemes = {},
