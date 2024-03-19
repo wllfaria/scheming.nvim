@@ -21,6 +21,7 @@
 ---@field mappings SchemingMappings
 ---@field schemes string[] | table<string, table>
 ---@field window SchemingWindowConfig
+---@field enable_preview boolean
 local Config = {}
 Config.__index = Config
 
@@ -38,6 +39,7 @@ function Config:with_default()
 	---@type SchemingConfig
 	local default = {
 		layout = "bottom",
+		enable_preview = true,
 		window = {
 			height = 12,
 			width = 80,

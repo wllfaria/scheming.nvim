@@ -96,14 +96,16 @@ end
 
 function View:create_auto_commands()
 	vim.api.nvim_create_augroup(self.augroup, { clear = true })
-	vim.api.nvim_create_autocmd("CursorMoved", {
-		buffer = self.buf,
-		group = self.augroup,
-		callback = function()
-			local scheme = vim.api.nvim_get_current_line()
-			vim.cmd.colorscheme(scheme)
-		end,
-	})
+	if Config:get().enable_preview then
+		vim.api.nvim_create_autocmd("CursorMoved", {
+			buffer = self.buf,
+			group = self.augroup,
+			callback = function()
+				local scheme = vim.api.nvim_get_current_line()
+				vim.cmd("silent! colorscheme " .. scheme)
+			end,
+		})
+	end
 	vim.api.nvim_create_autocmd("WinClosed", {
 		buffer = self.buf,
 		group = self.augroup,

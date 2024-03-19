@@ -15,6 +15,7 @@ local View = require("scheming.view")
 ---@field schemes string[] | table<string, table>?
 ---@field layout "bottom" | "float"?
 ---@field window PartialWindowConfig?
+---@field enable_preview boolean?
 
 ---@class Scheming
 ---@field config SchemingConfig
@@ -54,11 +55,7 @@ end
 Scheming.setup({
 	layout = "bottom",
 	schemes = { "radium", "rose-pine" },
-	window = {
-		height = 8,
-		show_border = true,
-		border = "single",
-	},
+	enable_preview = false,
 })
 vim.keymap.set("n", "<leader>sct", "<cmd>SchemingToggle<CR>", { noremap = true, silent = true })
 
