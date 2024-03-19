@@ -24,6 +24,8 @@ local Fs = require("scheming.fs")
 ---@field window PartialWindowConfig?
 ---@field enable_preview boolean?
 ---@field mappings PartialMappings?
+---@field sorting SchemingSorting?
+---@field override_hl table<string, vim.api.keyset.highlight>?
 
 ---@class Scheming
 ---@field config SchemingConfig
@@ -67,33 +69,8 @@ function Scheming.setup(config)
 	local scheme_name = scheme_config.config.package_name and scheme_config.config.package_name or scheme_config.scheme
 	self.loader:setup_scheme(scheme_name, scheme_config.config)
 	self.loader:apply_scheme(scheme_config.scheme)
+	self.loader:apply_override_hl()
 	return self
 end
-
-Scheming.setup({
-	layout = "bottom",
-	enable_preview = true,
-	schemes = {
-		radium = {
-			package_name = "colors.radium",
-		},
-		["rose-pine"] = {
-			tag = "dark",
-			variant = "main",
-		},
-		catppuccin = {
-			config = {
-				flavour = "latte",
-			},
-		},
-	},
-	mappings = {
-		toggle = { "<leader>sc" },
-	},
-	sorting = {
-		by = "tag",
-		order = "asc",
-	},
-})
 
 return Scheming

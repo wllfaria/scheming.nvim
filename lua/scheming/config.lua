@@ -37,6 +37,7 @@
 ---@field enable_preview boolean
 ---@field persist_scheme boolean
 ---@field sorting SchemingSorting
+---@field override_hl table<string, vim.api.keyset.highlight>
 local Config = {}
 Config.__index = Config
 
@@ -75,6 +76,7 @@ function Config:with_default()
 			by = "name",
 			order = "none",
 		},
+		override_hl = {},
 	}
 	instance = setmetatable(default, Config)
 	return instance

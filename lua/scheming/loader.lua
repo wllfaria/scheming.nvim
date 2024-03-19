@@ -54,4 +54,12 @@ function Loader:apply_scheme(scheme_name)
 	vim.cmd("silent! colorscheme " .. scheme_name)
 end
 
+function Loader:apply_override_hl()
+	local config = Config:get()
+
+	for group, hl in pairs(config.override_hl) do
+		vim.api.nvim_set_hl(0, group, hl)
+	end
+end
+
 return Loader
