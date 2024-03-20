@@ -27,19 +27,20 @@ function Loader:setup_scheme(scheme_name, scheme_config)
 	end
 	if scheme_config then
 		local ok, package = pcall(require, scheme_name)
-		if not ok then
-			self:scheme_not_found(scheme_name)
-			return false
+		if ok then
+			local setup = package.setup
+			if type(setup) == "function" then
+				setup(scheme_config)
+			end
 		end
-		package.setup(scheme_config)
 	else
 		local ok, package = pcall(require, scheme_name)
-		print(ok, package)
-		if not ok then
-			self:scheme_not_found(scheme_name)
-			return false
+		if ok then
+			local setup = package.setup
+			if type(setup) == "function" then
+				setup(scheme_config)
+			end
 		end
-		package.setup({})
 	end
 	return true
 end
