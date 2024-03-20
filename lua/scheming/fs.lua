@@ -1,3 +1,5 @@
+local Logger = require("scheming.logger")
+
 ---@class SavedConfig
 ---@field scheme string
 ---@field config table
@@ -6,6 +8,7 @@
 ---@field config_file string
 ---@field config_dir string | string[]
 ---@field config_path string
+---@field logger Logger
 local Fs = {}
 Fs.__index = Fs
 
@@ -22,6 +25,7 @@ function Fs:new()
 			config_file = config_file,
 			config_dir = config_dir,
 			config_path = config_path,
+			logger = Logger:new(),
 		}
 		instance = setmetatable(default, Fs)
 	end
@@ -31,6 +35,7 @@ end
 ---@param scheme_name string
 ---@param scheme_config table<string, any> | SchemeConfig
 function Fs:change_scheme(scheme_name, scheme_config)
+	self.logger:info("changing scheme to " .. scheme_name)
 	self:config_write({
 		scheme = scheme_name,
 		config = scheme_config,
@@ -49,6 +54,7 @@ end
 ---@return SavedConfig
 function Fs:config_read()
 	if not self:config_exists() then
+		self.logger:debug("config does not exist, creating empty config")
 		self:config_write({ scheme = "", config = {} })
 	end
 	local config_json = vim.fn.readfile(self.config_path)
@@ -60,6 +66,7 @@ end
 
 ---@param config SavedConfig
 function Fs:config_write(config)
+	self.logger:debug("writing config to " .. self.config_path)
 	---@type string
 	local config_json = vim.fn.json_encode(config)
 	assert(type(config_json) == "string", "Failed to encode config to JSON")

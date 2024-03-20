@@ -1,6 +1,7 @@
 local View = require("scheming.view")
 local Config = require("scheming.config")
 local Loader = require("scheming.loader")
+local Logger = require("scheming.logger")
 
 ---@class SchemingCommands
 ---@field augroup string
@@ -38,6 +39,7 @@ end
 ---Creates auto commands that are only applied to the scheming selection buffer.
 function Commands:create_auto_commands()
 	local view = View:new()
+	Logger:new():debug("creating auto commands")
 	vim.api.nvim_create_augroup(self.augroup, { clear = true })
 	if Config:get().enable_preview then
 		vim.api.nvim_create_autocmd("CursorMoved", {

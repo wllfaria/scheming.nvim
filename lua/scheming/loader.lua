@@ -1,8 +1,10 @@
 local Config = require("scheming.config")
 local Fs = require("scheming.fs")
+local Logger = require("scheming.logger")
 
 ---@class SchemingLoader
 ---@field fs SchemingFs
+---@field logger Logger
 local Loader = {}
 Loader.__index = Loader
 
@@ -13,6 +15,7 @@ function Loader:new()
 		---@type SchemingLoader
 		local default = {
 			fs = Fs:new(),
+			logger = Logger:new(),
 		}
 		instance = setmetatable(default, Loader)
 	end
@@ -31,7 +34,11 @@ function Loader:setup_scheme(scheme_name, scheme_config)
 			local setup = package.setup
 			if type(setup) == "function" then
 				setup(scheme_config)
+			else
+				self.logger:error("scheme " .. scheme_name .. " does not have a setup function")
 			end
+		else
+			self.logger:error("scheme " .. scheme_name .. " is not a lua package or is not installed")
 		end
 	else
 		local ok, package = pcall(require, scheme_name)
@@ -39,7 +46,11 @@ function Loader:setup_scheme(scheme_name, scheme_config)
 			local setup = package.setup
 			if type(setup) == "function" then
 				setup(scheme_config)
+			else
+				self.logger:error("scheme " .. scheme_name .. " does not have a setup function")
 			end
+		else
+			self.logger:error("scheme " .. scheme_name .. " is not a lua package or is not installed")
 		end
 	end
 	return true
